@@ -1,5 +1,6 @@
 package com.spring.mspaycredit.service;
 
+import com.spring.mspaycredit.entity.Credit;
 import com.spring.mspaycredit.entity.CreditTransaction;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -16,4 +17,6 @@ public interface CreditTransactionService {
     Mono<Boolean> delete(String t);
 
     Flux<CreditTransaction> findCreditsPaid(String id);
+
+    Mono<Credit> findCredit(String id);
 }

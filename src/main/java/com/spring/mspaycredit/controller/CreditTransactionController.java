@@ -21,8 +21,6 @@ import java.time.LocalDateTime;
 @Slf4j
 public class CreditTransactionController {
 
-    WebClient webClient = WebClient.create("http://localhost:8051/creditCharge");
-
     @Autowired
     CreditTransactionService creditTransactionService;
 
@@ -39,10 +37,7 @@ public class CreditTransactionController {
     @PostMapping("/create")
     public Mono<ResponseEntity<CreditTransaction>> create(@RequestBody CreditTransaction creditTransaction){
         // BUSCO EL CREDITO QUE SE PRETENDE HACER EL PAGO
-        return webClient.get().uri("/find/{id}", creditTransaction.getCredit().getId())
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(Credit.class)
+        return creditTransactionService.findCredit(creditTransaction.getCredit().getId())
                 .flatMap(credit -> creditTransactionService.findCreditsPaid(credit.getId()) // TODAS PAGOS DE ESTE CREDITO
                                     .collectList()
                                     .filter(listCt -> credit.getAmount() >= listCt.stream().mapToDouble(ct -> ct.getTransactionAmount()).sum() + creditTransaction.getTransactionAmount())
@@ -59,10 +54,7 @@ public class CreditTransactionController {
     @PutMapping("/update")
     public Mono<ResponseEntity<CreditTransaction>> update(@RequestBody CreditTransaction creditTransaction) {
         return creditTransactionService.findById(creditTransaction.getId())
-                .flatMap(ctDB -> webClient.get().uri("/find/{id}", ctDB.getCredit().getId())
-                                .accept(MediaType.APPLICATION_JSON)
-                                .retrieve()
-                                .bodyToMono(Credit.class)
+                .flatMap(ctDB -> creditTransactionService.findCredit(creditTransaction.getCredit().getId())
                                 .flatMap(credit -> creditTransactionService.findCreditsPaid(credit.getId())
                                             .collectList()
                                             .filter(listCt -> credit.getAmount() >= listCt.stream().mapToDouble(ct -> ct.getTransactionAmount()).sum() - ctDB.getTransactionAmount() + creditTransaction.getTransactionAmount())
