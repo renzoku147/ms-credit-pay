@@ -1,20 +1,18 @@
 package com.spring.mspaycredit.controller;
 
-import com.spring.mspaycredit.entity.Credit;
-import com.spring.mspaycredit.entity.CreditCard;
 import com.spring.mspaycredit.entity.CreditTransaction;
 import com.spring.mspaycredit.service.CreditTransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/creditPaid")
@@ -35,8 +33,9 @@ public class CreditTransactionController {
     }
 
     @PostMapping("/create")
-    public Mono<ResponseEntity<CreditTransaction>> create(@RequestBody CreditTransaction creditTransaction){
-        // BUSCO EL CREDITO QUE SE PRETENDE HACER EL PAGO
+    public Mono<ResponseEntity<CreditTransaction>> create(@Valid @RequestBody CreditTransaction creditTransaction){
+    	
+    	// BUSCO EL CREDITO QUE SE PRETENDE HACER EL PAGO
         return creditTransactionService.findCredit(creditTransaction.getCredit().getId())
                 .flatMap(credit -> creditTransactionService.findCreditsPaid(credit.getId()) // TODAS PAGOS DE ESTE CREDITO
                                     .collectList()
@@ -49,6 +48,7 @@ public class CreditTransactionController {
                 )
                 .map(ct -> new ResponseEntity<>(ct , HttpStatus.CREATED))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+    		
     }
 
     @PutMapping("/update")
@@ -77,4 +77,16 @@ public class CreditTransactionController {
                 .map(deleteCustomer -> new ResponseEntity<>("Customer Deleted", HttpStatus.ACCEPTED))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+    
+    @GetMapping("/findAmountCreditsPaidDebitCard/{id}")
+    public Flux<CreditTransaction> findAmountCreditsPaidDebitCard(@PathVariable String id) {
+        return creditTransactionService.findAmountCreditsPaidDebitCard(id);
+    }
+    
+    @GetMapping("/findByCreditCreditCardCustomerId/{idcustomer}")
+    public Flux<CreditTransaction> findByCreditCreditCardCustomerId(@PathVariable String idcustomer) {
+        return creditTransactionService.findByCreditCreditCardCustomerId(idcustomer);
+    }
+    
+    
 }

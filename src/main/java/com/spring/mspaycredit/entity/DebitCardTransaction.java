@@ -1,33 +1,28 @@
 package com.spring.mspaycredit.entity;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
 
 @Data
 @Builder
-@Document("CreditTransaction")
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreditTransaction {
-    @Id
+public class DebitCardTransaction {
     private String id;
 
-    @NotNull
     private Credit credit;
+    
+    private DebitCard debitCard;
 
-    @NotBlank
     private String transactionCode;
 
-    @NotNull
     private Double transactionAmount;
+    
+    private TypeTransactionDebitCard typeTransactionDebitCard;
 
     private LocalDateTime transactionDateTime;
 }
